@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Retrospectiva</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0f0f14;--surf:#18181f;--card:#1e1e28;--brd:#2a2a38;
+  --pink:#f72585;--green:#1db954;--gold:#ffd166;--blue:#4cc9f0;
+  --text:#f0f0f0;--muted:#777;--danger:#e74c3c;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+.layout{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+
+/* SIDEBAR */
+aside{background:var(--surf);border-right:1px solid var(--brd);
+  position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow-y:auto}
+.logo{padding:18px 18px 14px;border-bottom:1px solid var(--brd)}
+.logo h1{font-size:14px;font-weight:600;color:var(--pink)}
+.logo p{font-size:11px;color:var(--muted);margin-top:2px}
+nav{flex:1;padding:10px 0}
+.ns{padding:8px 18px 3px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 18px;cursor:pointer;
+  font-size:13px;color:var(--muted);transition:all .18s;border-left:3px solid transparent}
+.ni:hover{color:var(--text);background:rgba(255,255,255,0.025)}
+.ni.on{color:var(--text);background:rgba(247,37,133,0.07);border-left-color:var(--pink)}
+.ni i{font-size:15px;width:18px;text-align:center}
+.sfoot{padding:14px 18px;border-top:1px solid var(--brd);display:flex;flex-direction:column;gap:8px}
+.btn-prev{display:block;padding:9px;background:var(--pink);color:#fff;border:none;
+  border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;text-align:center;
+  text-decoration:none;transition:opacity .2s}
+.btn-prev:hover{opacity:.88}
+.btn-exp{padding:7px;background:transparent;color:var(--muted);
+  border:1px solid var(--brd);border-radius:7px;font-size:12px;cursor:pointer;transition:all .18s}
+.btn-exp:hover{color:var(--text);border-color:var(--muted)}
+
+/* MAIN */
+main{padding:28px;overflow-y:auto;min-height:100vh;padding-bottom:80px}
+.page{display:none}.page.on{display:block}
+.pg-title{font-size:21px;font-weight:600;margin-bottom:4px}
+.pg-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:22px;margin-bottom:18px}
+.ct{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:1px;
+  text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.ct .d{width:7px;height:7px;border-radius:50%;background:var(--pink);flex-shrink:0}
+
+/* FORM */
+.f{margin-bottom:16px}
+.lbl{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
+.inp,.txta,.sel{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--brd);
+  border-radius:7px;padding:9px 13px;color:var(--text);font-size:14px;
+  font-family:'DM Sans',sans-serif;transition:border-color .18s;outline:none}
+.inp:focus,.txta:focus,.sel:focus{border-color:var(--pink)}
+.txta{resize:vertical;min-height:90px;line-height:1.6}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.hint{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* STORAGE METER */
+.stor{background:rgba(255,255,255,0.03);border:1px solid var(--brd);border-radius:10px;padding:14px;margin-bottom:18px}
+.stor-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.stor-lbl{font-size:12px;color:var(--muted)}
+.stor-val{font-size:12px;font-weight:600}
+.stor-bar{height:6px;background:rgba(255,255,255,0.08);border-radius:3px}
+.stor-fill{height:100%;border-radius:3px;transition:width .4s}
+.stor-items{display:flex;gap:12px;margin-top:10px;flex-wrap:wrap}
+.stor-item{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.stor-dot{width:8px;height:8px;border-radius:50%}
+
+/* TIMELINE */
+.tll{display:flex;flex-direction:column;gap:10px}
+.tled{background:rgba(255,255,255,0.025);border:1px solid var(--brd);border-radius:9px;padding:14px;position:relative}
+.tled-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.tled-n{font-size:11px;font-weight:600;color:var(--pink);letter-spacing:1px}
+.tled-a{display:flex;gap:5px}
+.bsm{padding:4px 9px;border-radius:5px;border:1px solid var(--brd);
+  background:transparent;color:var(--muted);font-size:11px;cursor:pointer;transition:all .18s}
+.bsm:hover{color:var(--text);border-color:var(--muted)}
+.bsm.del:hover{color:var(--danger);border-color:var(--danger)}
+.badd{width:100%;padding:10px;border-radius:9px;border:1px dashed var(--brd);
+  background:transparent;color:var(--muted);font-size:13px;cursor:pointer;
+  transition:all .18s;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:7px}
+.badd:hover{color:var(--text);border-color:var(--pink)}
+
+/* CORES */
+.cols{display:flex;gap:7px;flex-wrap:wrap}
+.col{width:28px;height:28px;border-radius:50%;cursor:pointer;
+  border:3px solid transparent;transition:all .18s}
+.col.sel{border-color:#fff;transform:scale(1.18)}
+.col[data-c="pink"]{background:#f72585}
+.col[data-c="gold"]{background:#ffd166}
+.col[data-c="green"]{background:#1db954}
+.col[data-c="blue"]{background:#4cc9f0}
+.col[data-c="purple"]{background:#9b5de5}
+
+/* FOTOS */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.pitem{aspect-ratio:1;border-radius:9px;overflow:hidden;position:relative;
+  border:1px solid var(--brd);background:var(--card)}
+.pitem img{width:100%;height:100%;object-fit:cover;display:block}
+.pdel{position:absolute;top:5px;right:5px;width:24px;height:24px;
+  border-radius:50%;background:rgba(0,0,0,0.75);border:none;color:#fff;
+  font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.padd{aspect-ratio:1;border-radius:9px;border:2px dashed var(--brd);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:5px;cursor:pointer;color:var(--muted);font-size:12px;transition:all .18s}
+.padd:hover{border-color:var(--pink);color:var(--pink)}
+.padd .ic{font-size:26px}
+
+/* MÚSICA */
+.mp3-drop{border:2px dashed var(--brd);border-radius:10px;padding:28px 18px;
+  text-align:center;cursor:pointer;transition:all .18s}
+.mp3-drop:hover,.mp3-drop.drag{border-color:var(--pink)}
+.mp3-prev{background:rgba(29,185,84,0.07);border:1px solid rgba(29,185,84,0.22);
+  border-radius:10px;padding:14px;display:none}
+.mp3-prev.on{display:block}
+.mp3-pbar{height:3px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:10px;cursor:pointer}
+.mp3-pfill{height:100%;background:var(--green);width:0%;border-radius:3px;transition:width .4s linear}
+
+/* DEPLOY */
+.step{background:rgba(255,255,255,0.02);border:1px solid var(--brd);border-radius:10px;padding:18px;margin-bottom:14px}
+.step-n{font-size:13px;font-weight:600;color:var(--pink);margin-bottom:10px}
+.step ol{font-size:13px;color:var(--muted);line-height:2.1;padding-left:18px}
+.step ol b{color:var(--text)}
+code{background:rgba(255,255,255,0.05);padding:1px 5px;border-radius:4px;font-size:12px}
+
+/* SAVE BAR */
+#savebar{position:fixed;bottom:0;left:230px;right:0;
+  background:rgba(15,15,20,0.97);backdrop-filter:blur(10px);
+  border-top:1px solid var(--brd);padding:12px 28px;
+  display:flex;align-items:center;justify-content:space-between;z-index:50}
+.sstat{font-size:13px;color:var(--muted)}
+.sstat.ok{color:var(--green)}.sstat.no{color:var(--gold)}
+.sbts{display:flex;gap:9px}
+.bsave{padding:9px 24px;background:var(--pink);color:#fff;border:none;
+  border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;transition:all .18s}
+.bsave:hover{opacity:.88;transform:translateY(-1px)}
+.bsave.ghost{background:var(--surf);border:1px solid var(--brd);color:var(--text)}
+
+/* TOAST */
+#toast{position:fixed;top:18px;right:18px;background:var(--green);color:#000;
+  padding:9px 18px;border-radius:7px;font-size:13px;font-weight:600;
+  opacity:0;pointer-events:none;transition:opacity .28s;z-index:300}
+#toast.on{opacity:1}
+
+@media(max-width:700px){.layout{grid-template-columns:1fr}aside{display:none}#savebar{left:0}.r2,.r3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="toast">✓ Salvo!</div>
+
+<div class="layout">
+<aside>
+  <div class="logo"><h1>✦ Retrospectiva</h1><p>Painel de Edição</p></div>
+  <nav>
+    <div class="ns">Seções</div>
+    <div class="ni on" onclick="go('capa')"><i>🎵</i> Capa</div>
+    <div class="ni" onclick="go('contador')"><i>💕</i> Contador</div>
+    <div class="ni" onclick="go('timeline')"><i>📍</i> Timeline</div>
+    <div class="ni" onclick="go('galeria')"><i>📸</i> Galeria</div>
+    <div class="ni" onclick="go('carta')"><i>💌</i> Carta</div>
+    <div class="ns">Geral</div>
+    <div class="ni" onclick="go('musica')"><i>🎧</i> Música</div>
+    <div class="ns">Publicar</div>
+    <div class="ni" onclick="go('deploy')"><i>🚀</i> Deploy</div>
+    <div class="ni" onclick="go('github')"><i>🐙</i> GitHub</div>
+  </nav>
+  <div class="sfoot">
+    <a href="index.html" target="_blank" class="btn-prev">Ver Página →</a>
+    <button class="btn-exp" onclick="exportJSON()">⬇ Exportar JSON</button>
+  </div>
+</aside>
+
+<main>
+
+<!-- STORAGE METER (sempre visível) -->
+<div class="stor" id="storMeter">
+  <div class="stor-top">
+    <span class="stor-lbl">💾 Uso do localStorage</span>
+    <span class="stor-val" id="storVal">calculando...</span>
+  </div>
+  <div class="stor-bar"><div class="stor-fill" id="storFill" style="width:0%;background:var(--green)"></div></div>
+  <div class="stor-items">
+    <span class="stor-item"><div class="stor-dot" style="background:var(--pink)"></div><span id="storMeta">Dados: —</span></span>
+    <span class="stor-item"><div class="stor-dot" style="background:var(--blue)"></div><span id="storPhotos">Fotos: —</span></span>
+    <span class="stor-item"><div class="stor-dot" style="background:var(--green)"></div><span id="storMusic">Música: —</span></span>
+    <span class="stor-item" style="color:var(--muted)">Limite: ~5MB</span>
+  </div>
+</div>
+
+<!-- CAPA -->
+<div class="page on" id="page-capa">
+  <div class="pg-title">🎵 Capa</div>
+  <div class="pg-sub">O slide de abertura</div>
+  <div class="card">
+    <div class="ct"><div class="d"></div>Nomes</div>
+    <div class="r2">
+      <div class="f"><label class="lbl">Nome 1 (rosa)</label><input class="inp" id="f-n1" oninput="dirty()"></div>
+      <div class="f"><label class="lbl">Nome 2</label><input class="inp" id="f-n2" oninput="dirty()"></div>
+    </div>
+    <div class="f"><label class="lbl">Frase acima dos nomes</label><input class="inp" id="f-eye" oninput="dirty()"></div>
+    <div class="f"><label class="lbl">Subtítulo</label><input class="inp" id="f-sub" oninput="dirty()"></div>
+    <div class="f"><label class="lbl">Emoji central</label><input class="inp" id="f-emoji" style="max-width:100px" oninput="dirty()"></div>
+  </div>
+</div>
+
+<!-- CONTADOR -->
+<div class="page" id="page-contador">
+  <div class="pg-title">💕 Contador de Dias</div>
+  <div class="pg-sub">Calculado automaticamente</div>
+  <div class="card">
+    <div class="ct"><div class="d"></div>Data de início</div>
+    <div class="f"><label class="lbl">Quando o namoro começou?</label>
+      <input class="inp" type="date" id="f-date" oninput="dirty();updCnt()"></div>
+    <div style="background:rgba(247,37,133,0.07);border:1px solid rgba(247,37,133,0.18);border-radius:9px;padding:14px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:5px">Preview</div>
+      <div style="font-size:34px;font-weight:700" id="cntPrev">—</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px" id="cntSince">dias juntos</div>
+    </div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="page" id="page-timeline">
+  <div class="pg-title">📍 Momentos Especiais</div>
+  <div class="pg-sub">Adicione, edite e reordene</div>
+  <div class="card">
+    <div class="ct"><div class="d"></div>Momentos</div>
+    <div class="tll" id="tlList"></div>
+    <button class="badd" onclick="addTl()">＋ Adicionar Momento</button>
+  </div>
+</div>
+
+<!-- GALERIA -->
+<div class="page" id="page-galeria">
+  <div class="pg-title">📸 Galeria de Fotos</div>
+  <div class="pg-sub">A primeira foto fica maior. Fotos são comprimidas automaticamente.</div>
+  <div class="card">
+    <div class="ct"><div class="d"></div>Título</div>
+    <div class="f"><input class="inp" id="f-galtit" placeholder="A Galeria" oninput="dirty()"></div>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="d"></div>Fotos <span style="color:var(--muted);font-size:11px;margin-left:auto;font-weight:400" id="photoCount">0</span></div>
+    <input type="file" id="fImg" accept="image/*" multiple style="display:none" onchange="addPhotos(this.files)">
+    <div class="pgrid" id="pgrid">
+      <div class="padd" onclick="document.getElementById('fImg').click()">
+        <span class="ic">📁</span><span>Adicionar fotos</span>
+      </div>
+    </div>
+    <div class="hint" style="margin-top:10px">Fotos comprimidas para ~500px para economizar espaço. Clique em ✕ para remover.</div>
+  </div>
+</div>
+
+<!-- CARTA -->
+<div class="page" id="page-carta">
+  <div class="pg-title">💌 Carta</div>
+  <div class="pg-sub">O texto mais importante da página</div>
+  <div class="card">
+    <div class="ct"><div class="d"></div>Mensagem</div>
+    <div class="f"><label class="lbl">Destinatário (ex: "Para Lorrany")</label>
+      <input class="inp" id="f-llbl" oninput="dirty()"></div>
+    <div class="f"><label class="lbl">Texto da carta</label>
+      <textarea class="txta" id="f-ltxt" rows="8" oninput="dirty()"></textarea>
+      <div class="hint">Enter para pular linha.</div></div>
+    <div class="f"><label class="lbl">Assinatura</label>
+      <input class="inp" id="f-lsig" oninput="dirty()"></div>
+  </div>
+</div>
+
+<!-- MÚSICA -->
+<div class="page" id="page-musica">
+  <div class="pg-title">🎧 Música</div>
+  <div class="pg-sub">Upload do arquivo MP3 — fica separado dos dados de texto</div>
+  <div class="card">
+    <div class="ct"><div class="d"></div>Informações do Player</div>
+    <div class="r2">
+      <div class="f"><label class="lbl">Emoji</label><input class="inp" id="f-mEmoji" placeholder="♪" oninput="dirty()"></div>
+      <div class="f"></div>
+    </div>
+    <div class="f"><label class="lbl">Nome da música</label><input class="inp" id="f-mTitle" oninput="dirty()"></div>
+    <div class="f"><label class="lbl">Artista</label><input class="inp" id="f-mArtist" oninput="dirty()"></div>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="d"></div>Arquivo de Áudio</div>
+
+    <!-- Preview de áudio (quando carregado) -->
+    <div class="mp3-prev" id="mp3Prev">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button id="mp3PlayBtn" onclick="mp3TogglePlay()"
+          style="width:36px;height:36px;border-radius:50%;background:var(--green);border:none;color:#000;font-size:14px;cursor:pointer;flex-shrink:0">▶</button>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500" id="mp3Name">—</div>
+          <div style="font-size:11px;color:var(--muted)" id="mp3Size">—</div>
+        </div>
+        <button onclick="removeMp3()" style="padding:5px 10px;background:transparent;
+          border:1px solid rgba(231,76,60,.4);border-radius:6px;color:var(--danger);font-size:11px;cursor:pointer">
+          ✕ Remover
+        </button>
+      </div>
+      <div class="mp3-pbar" onclick="mp3Seek(event)"><div class="mp3-pfill" id="mp3PFill"></div></div>
+    </div>
+
+    <input type="file" id="fMp3" accept="audio/mp3,audio/mpeg,audio/wav,audio/*" style="display:none" onchange="loadMp3(this.files[0])">
+
+    <div class="mp3-drop" id="mp3Drop"
+      onclick="document.getElementById('fMp3').click()"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="event.preventDefault();this.classList.remove('drag');loadMp3(event.dataTransfer.files[0])">
+      <div style="font-size:30px;margin-bottom:7px">🎵</div>
+      <div style="font-size:14px;font-weight:500">Clique ou arraste o MP3 aqui</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:5px">MP3 / WAV • qualquer tamanho</div>
+    </div>
+
+    <div style="background:rgba(255,209,102,0.07);border:1px solid rgba(255,209,102,0.2);border-radius:9px;padding:13px;margin-top:14px">
+      <div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:5px">💡 Como funciona</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7">
+        A música <strong style="color:var(--text)">não fica no localStorage</strong> — fica salva separadamente no navegador (IndexedDB). 
+        Na hora de gerar o arquivo para deploy, o botão 
+        <strong style="color:var(--pink)">"Baixar pacote completo"</strong> na aba Deploy 
+        vai baixar um <code>.zip</code> com o <code>index.html</code> + o arquivo <code>music.mp3</code> prontos.
+        Assim não tem limite de espaço para a música! 🎵
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DEPLOY -->
+<div class="page" id="page-deploy">
+  <div class="pg-title">🚀 Deploy no Netlify</div>
+  <div class="pg-sub">Publique sua página gratuitamente</div>
+
+  <div class="card" style="border-color:rgba(247,37,133,0.3)">
+    <div class="ct"><div class="d"></div>Gerar pacote completo</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px">
+      Clique abaixo para baixar um <code>.zip</code> com todos os arquivos prontos para o Netlify:
+      <code>index.html</code> com dados embutidos + <code>music.mp3</code> (se você fez upload).
+    </p>
+    <button class="bsave" id="btnBake" onclick="bakeDownload()">⬇ Baixar pacote completo (.zip)</button>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px" id="bakeStatus"></div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">Passo 1 — Extraia o .zip</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7">
+      Depois de baixar, extraia a pasta. Você verá: <code>index.html</code>, <code>admin.html</code>, <code>music.mp3</code>, <code>netlify.toml</code>.
+    </p>
+  </div>
+
+  <div class="step">
+    <div class="step-n">Passo 2 — Deploy no Netlify</div>
+    <ol>
+      <li>Acesse <b>netlify.com</b> e crie uma conta grátis</li>
+      <li>Clique em <b>"Add new site"</b> → <b>"Deploy manually"</b></li>
+      <li>Arraste a <b>pasta inteira</b> extraída para a área de deploy</li>
+      <li>Aguarde ~30 segundos</li>
+      <li>Copie o link e mande para a Lorrany! 💕</li>
+    </ol>
+  </div>
+
+  <div class="step">
+    <div class="step-n">Passo 3 — URL personalizada (opcional)</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7">
+      Nas configurações do site no Netlify, renomeie para algo como <code>lorrany-e-lucas.netlify.app</code>.
+    </p>
+  </div>
+</div>
+
+<!-- GITHUB -->
+<div class="page" id="page-github">
+  <div class="pg-title">🐙 GitHub</div>
+  <div class="pg-sub">Salve os dados no repositório e acesse de qualquer dispositivo</div>
+
+  <div class="card">
+    <div class="ct"><div class="d"></div>Credenciais</div>
+    <div class="f">
+      <label class="lbl">Personal Access Token</label>
+      <input class="inp" type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
+      <div class="hint">Acesse <strong>github.com/settings/tokens</strong> → <em>Generate new token (classic)</em> → marque o escopo <code>repo</code></div>
+    </div>
+    <div class="r2">
+      <div class="f">
+        <label class="lbl">Usuário GitHub</label>
+        <input class="inp" id="gh-owner" placeholder="seu-usuario">
+      </div>
+      <div class="f">
+        <label class="lbl">Nome do repositório</label>
+        <input class="inp" id="gh-repo" placeholder="retrospectiva">
+      </div>
+    </div>
+    <div class="f">
+      <label class="lbl">Branch</label>
+      <input class="inp" id="gh-branch" placeholder="main" style="max-width:160px">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:10px;align-items:center">
+      <button class="bsave ghost" onclick="saveGhCfg()">💾 Salvar credenciais</button>
+      <span id="ghCfgStatus" style="font-size:12px;color:var(--green)"></span>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:rgba(76,201,240,0.25)">
+    <div class="ct"><div class="d" style="background:var(--blue)"></div>Sincronizar</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px">
+      Envia <strong style="color:var(--text)">todos os dados</strong> (textos, fotos e música) para o repositório.
+      Qualquer dispositivo que abrir o site verá as informações atualizadas.
+    </p>
+    <button class="bsave" id="btnGhSync" onclick="syncToGitHub()" style="background:var(--blue);color:#0a0a0f">☁ Sincronizar com GitHub</button>
+    <div id="ghSyncLog" style="margin-top:14px;font-size:12px;line-height:2;color:var(--muted)"></div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">Como configurar o GitHub Pages (primeira vez)</div>
+    <ol>
+      <li>Crie um repositório <b>público</b> no GitHub (ex: <code>retrospectiva</code>)</li>
+      <li>Gere um token em <b>Settings → Developer settings → Personal access tokens (classic)</b> com escopo <code>repo</code></li>
+      <li>Preencha as credenciais acima e clique em <b>Salvar credenciais</b></li>
+      <li>Clique em <b>Sincronizar com GitHub</b> — isso cria os arquivos no repositório</li>
+      <li>Faça upload manual dos arquivos <code>index.html</code> e <code>admin.html</code> para o repositório (uma única vez)</li>
+      <li>No repositório → <b>Settings → Pages → Source: Deploy from branch → Branch: main</b></li>
+      <li>Aguarde ~1 minuto → acesse <code>seu-usuario.github.io/retrospectiva</code> 💕</li>
+    </ol>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- SAVE BAR -->
+<div id="savebar">
+  <div class="sstat" id="sstat">Todos os dados salvos ✓</div>
+  <div class="sbts">
+    <button class="bsave ghost" onclick="resetAll()">↺ Resetar</button>
+    <button class="bsave ghost" onclick="syncToGitHub()" title="Sincronizar com GitHub">☁ GitHub</button>
+    <button class="bsave" onclick="saveAll()">💾 Salvar tudo</button>
+  </div>
+</div>
+
+<!-- JSZip para o bake -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+// ══════════════════════════════════════════════════
+// DADOS — apenas metadados de texto (sem mídia)
+// ══════════════════════════════════════════════════
+const DEF_META = {
+  name1:"Lorrany",name2:"Lucas",
+  eyebrow:"Uma história de amor",subtitle:"A nossa playlist favorita 🎵",heroEmoji:"💕",
+  startDate:"2023-01-15",
+  musicTitle:"Nossa Música Favorita",musicArtist:"A definir",musicEmoji:"♪",
+  letterLabel:"Para Lorrany",
+  letterText:"Você transformou os meus dias em algo que eu não sabia que era possível.\n\nCada momento ao seu lado é uma música nova, uma que quero ouvir pra sempre.\n\nObrigado por ser exatamente quem você é — e por escolher estar aqui, comigo.",
+  letterSig:"Com amor, Lucas 🌹",
+  galleryTitle:"A Galeria",
+  timeline:[
+    {emoji:"✨",color:"pink",date:"Jan 2023",title:"O Início",desc:"Aquele momento que mudou tudo."},
+    {emoji:"💋",color:"gold",date:"Mar 2023",title:"Primeiro Beijo",desc:"O coração acelerado, o tempo parado."},
+    {emoji:"🎉",color:"green",date:"Jun 2023",title:"Aniversário do Namoro",desc:"Um ano de risadas e descobertas."},
+    {emoji:"✈️",color:"blue",date:"Dez 2023",title:"Viagem Inesquecível",desc:"A melhor viagem sempre é ao lado de você."}
+  ],
+  photos:[] // [{data: base64_comprimida, caption:''}]
+};
+
+// Fotos: salvas em chave separada (retro_photos) para não misturar com meta
+// Música: salva em IndexedDB (retro_music)
+
+function loadMeta(){
+  try{const r=localStorage.getItem('retro_meta');return r?{...DEF_META,...JSON.parse(r)}:{...DEF_META};}
+  catch(e){return{...DEF_META};}
+}
+function loadPhotos(){
+  try{const r=localStorage.getItem('retro_photos');return r?JSON.parse(r):[];}
+  catch(e){return[];}
+}
+
+let meta = loadMeta();
+let photos = loadPhotos();
+let unsaved = false;
+
+// ── IndexedDB para música ──────────────────────────────────
+const IDB_NAME='retro_idb', IDB_STORE='music';
+let db=null;
+function openDB(){
+  return new Promise((res,rej)=>{
+    if(db){res(db);return;}
+    const req=indexedDB.open(IDB_NAME,1);
+    req.onupgradeneeded=e=>e.target.result.createObjectStore(IDB_STORE);
+    req.onsuccess=e=>{db=e.target.result;res(db);};
+    req.onerror=()=>rej();
+  });
+}
+async function saveMusic(blob){
+  const d=await openDB();
+  return new Promise((res,rej)=>{
+    const tx=d.transaction(IDB_STORE,'readwrite');
+    tx.objectStore(IDB_STORE).put(blob,'track');
+    tx.oncomplete=res;tx.onerror=rej;
+  });
+}
+async function loadMusic(){
+  try{
+    const d=await openDB();
+    return new Promise((res)=>{
+      const tx=d.transaction(IDB_STORE,'readonly');
+      const req=tx.objectStore(IDB_STORE).get('track');
+      req.onsuccess=()=>res(req.result||null);
+      req.onerror=()=>res(null);
+    });
+  }catch(e){return null;}
+}
+async function deleteMusic(){
+  const d=await openDB();
+  return new Promise(res=>{
+    const tx=d.transaction(IDB_STORE,'readwrite');
+    tx.objectStore(IDB_STORE).delete('track');
+    tx.oncomplete=res;
+  });
+}
+
+// ══════════════════════════════════════════════════
+// STORAGE METER
+// ══════════════════════════════════════════════════
+function kb(str){return str?(str.length*2/1024).toFixed(1)+'KB':'0KB';}
+function pct(str,total){return str?(str.length*2/1024/total*100):0;}
+
+async function updateMeter(){
+  const metaStr  = localStorage.getItem('retro_meta')||'';
+  const photoStr = localStorage.getItem('retro_photos')||'';
+  const totalKB  = 5*1024; // 5MB
+  const usedKB   = (metaStr.length+photoStr.length)*2/1024;
+  const usedPct  = Math.min(usedKB/totalKB*100,100);
+  const color    = usedPct>80?'var(--danger)':usedPct>60?'var(--gold)':'var(--green)';
+
+  document.getElementById('storFill').style.width=usedPct+'%';
+  document.getElementById('storFill').style.background=color;
+  document.getElementById('storVal').textContent=`${usedKB.toFixed(0)}KB / 5120KB`;
+  document.getElementById('storVal').style.color=color;
+  document.getElementById('storMeta').textContent=`Dados: ${kb(metaStr)}`;
+  document.getElementById('storPhotos').textContent=`Fotos: ${kb(photoStr)}`;
+
+  const music = await loadMusic();
+  document.getElementById('storMusic').textContent = music
+    ? `Música: ${(music.size/1024).toFixed(0)}KB (IndexedDB ✓)`
+    : 'Música: não carregada';
+}
+
+// ══════════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════════
+function go(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('page-'+id).classList.add('on');
+  document.querySelectorAll('.ni').forEach(n=>{
+    if((n.getAttribute('onclick')||'').includes("'"+id+"'")) n.classList.add('on');
+  });
+  fill();
+  if(id==='timeline') renderTl();
+  if(id==='galeria'){renderPhotos();updateMeter();}
+  if(id==='contador') updCnt();
+  if(id==='musica') restoreMusic();
+  if(id==='deploy') updateMeter();
+  if(id==='github') fillGhCfg();
+}
+
+// ══════════════════════════════════════════════════
+// FILL / COLLECT
+// ══════════════════════════════════════════════════
+function g(id){const e=document.getElementById(id);return e?e.value:'';}
+function s(id,v){const e=document.getElementById(id);if(e&&v!==undefined)e.value=v;}
+
+function fill(){
+  s('f-n1',meta.name1);s('f-n2',meta.name2);
+  s('f-eye',meta.eyebrow);s('f-sub',meta.subtitle);s('f-emoji',meta.heroEmoji);
+  s('f-date',meta.startDate);
+  s('f-mEmoji',meta.musicEmoji);s('f-mTitle',meta.musicTitle);s('f-mArtist',meta.musicArtist);
+  s('f-llbl',meta.letterLabel);s('f-ltxt',meta.letterText);s('f-lsig',meta.letterSig);
+  s('f-galtit',meta.galleryTitle);
+}
+
+function collect(){
+  meta.name1=g('f-n1')||meta.name1; meta.name2=g('f-n2')||meta.name2;
+  meta.eyebrow=g('f-eye'); meta.subtitle=g('f-sub'); meta.heroEmoji=g('f-emoji');
+  meta.startDate=g('f-date');
+  meta.musicEmoji=g('f-mEmoji'); meta.musicTitle=g('f-mTitle'); meta.musicArtist=g('f-mArtist');
+  meta.letterLabel=g('f-llbl'); meta.letterText=g('f-ltxt'); meta.letterSig=g('f-lsig');
+  meta.galleryTitle=g('f-galtit');
+}
+
+// ══════════════════════════════════════════════════
+// SAVE
+// ══════════════════════════════════════════════════
+function dirty(){
+  unsaved=true;
+  const el=document.getElementById('sstat');
+  el.className='sstat no';el.textContent='Alterações não salvas...';
+}
+
+function saveAll(){
+  collect();
+  try{
+    // Salva meta (sem fotos, sem música)
+    const metaOnly = {...meta};
+    delete metaOnly.photos; // garantia
+    localStorage.setItem('retro_meta', JSON.stringify(metaOnly));
+    // Fotos separadas
+    localStorage.setItem('retro_photos', JSON.stringify(photos));
+    unsaved=false;
+    const el=document.getElementById('sstat');
+    el.className='sstat ok';el.textContent='Salvo ✓';
+    toast();updateMeter();
+    setTimeout(()=>{el.textContent='Todos os dados salvos ✓';},3000);
+  }catch(e){
+    if(e.name==='QuotaExceededError'){
+      alert('Espaço insuficiente!\n\nTente remover algumas fotos — cada foto ocupa espaço no localStorage.\nA música é salva separadamente (sem impacto aqui).');
+    }
+  }
+}
+
+function toast(){
+  const t=document.getElementById('toast');t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),2200);
+}
+
+function resetAll(){
+  if(!confirm('Resetar TODOS os dados? Fotos e texto serão apagados.')) return;
+  meta={...DEF_META};photos=[];
+  localStorage.removeItem('retro_meta');localStorage.removeItem('retro_photos');
+  fill();renderTl();renderPhotos();
+  document.getElementById('sstat').className='sstat ok';
+  document.getElementById('sstat').textContent='Resetado ✓';
+  updateMeter();
+}
+
+// ══════════════════════════════════════════════════
+// TIMELINE
+// ══════════════════════════════════════════════════
+function renderTl(){
+  const list=document.getElementById('tlList');
+  list.innerHTML='';
+  (meta.timeline||[]).forEach((t,i)=>{
+    const d=document.createElement('div');d.className='tled';
+    d.innerHTML=`
+      <div class="tled-h">
+        <span class="tled-n">Track ${String(i+1).padStart(2,'0')}</span>
+        <div class="tled-a">
+          ${i>0?`<button class="bsm" onclick="mvTl(${i},-1)">↑</button>`:''}
+          ${i<meta.timeline.length-1?`<button class="bsm" onclick="mvTl(${i},1)">↓</button>`:''}
+          <button class="bsm del" onclick="rmTl(${i})">✕</button>
+        </div>
+      </div>
+      <div class="r3">
+        <div class="f"><label class="lbl">Emoji</label>
+          <input class="inp" value="${t.emoji||'✨'}" onchange="meta.timeline[${i}].emoji=this.value;dirty()"></div>
+        <div class="f"><label class="lbl">Data</label>
+          <input class="inp" value="${t.date||''}" placeholder="Jan 2023" onchange="meta.timeline[${i}].date=this.value;dirty()"></div>
+        <div class="f"><label class="lbl">Cor</label>
+          <div class="cols">${['pink','gold','green','blue','purple'].map(c=>`
+            <div class="col${t.color===c?' sel':''}" data-c="${c}"
+              onclick="meta.timeline[${i}].color='${c}';this.closest('.cols').querySelectorAll('.col').forEach(x=>x.classList.remove('sel'));this.classList.add('sel');dirty()"></div>
+          `).join('')}</div>
+        </div>
+      </div>
+      <div class="f"><label class="lbl">Título</label>
+        <input class="inp" value="${t.title||''}" onchange="meta.timeline[${i}].title=this.value;dirty()"></div>
+      <div class="f"><label class="lbl">Descrição</label>
+        <textarea class="txta" rows="2" onchange="meta.timeline[${i}].desc=this.value;dirty()">${t.desc||''}</textarea></div>`;
+    list.appendChild(d);
+  });
+}
+function addTl(){meta.timeline.push({emoji:'⭐',color:'pink',date:'',title:'Novo Momento',desc:''});renderTl();dirty();}
+function rmTl(i){if(!confirm('Remover?'))return;meta.timeline.splice(i,1);renderTl();dirty();}
+function mvTl(i,d){const a=meta.timeline[i],b=meta.timeline[i+d];meta.timeline[i]=b;meta.timeline[i+d]=a;renderTl();dirty();}
+
+// ══════════════════════════════════════════════════
+// FOTOS (comprime para economizar espaço)
+// ══════════════════════════════════════════════════
+function renderPhotos(){
+  const grid=document.getElementById('pgrid');
+  grid.innerHTML='';
+  photos.forEach((p,i)=>{
+    const div=document.createElement('div');div.className='pitem';
+    div.innerHTML=`<img src="${p.data}" alt=""><button class="pdel" onclick="rmPhoto(${i})">✕</button>`;
+    grid.appendChild(div);
+  });
+  const add=document.createElement('div');add.className='padd';
+  add.innerHTML='<span class="ic">📁</span><span>Adicionar</span>';
+  add.onclick=()=>document.getElementById('fImg').click();
+  grid.appendChild(add);
+  document.getElementById('photoCount').textContent=photos.length+' fotos';
+}
+
+function addPhotos(files){
+  let done=0;
+  Array.from(files).forEach(f=>{
+    if(!f.type.startsWith('image/'))return;
+    const r=new FileReader();
+    r.onload=e=>{
+      compress(e.target.result,480,.65,c=>{
+        photos.push({data:c,caption:''});
+        done++;
+        if(done===files.length){renderPhotos();dirty();updateMeter();}
+      });
+    };
+    r.readAsDataURL(f);
+  });
+}
+
+function compress(dataUrl,maxW,q,cb){
+  const img=new Image();
+  img.onload=()=>{
+    let w=img.width,h=img.height;
+    if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+    const c=document.createElement('canvas');c.width=w;c.height=h;
+    c.getContext('2d').drawImage(img,0,0,w,h);
+    cb(c.toDataURL('image/jpeg',q));
+  };
+  img.src=dataUrl;
+}
+
+function rmPhoto(i){
+  if(!confirm('Remover foto?'))return;
+  photos.splice(i,1);renderPhotos();dirty();updateMeter();
+}
+
+// ══════════════════════════════════════════════════
+// CONTADOR
+// ══════════════════════════════════════════════════
+function updCnt(){
+  const v=g('f-date')||meta.startDate;if(!v)return;
+  const s=new Date(v),d=Math.floor((new Date()-s)/864e5);
+  document.getElementById('cntPrev').textContent=d.toLocaleString('pt-BR');
+  document.getElementById('cntSince').textContent='dias desde '+s.toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
+}
+
+// ══════════════════════════════════════════════════
+// MÚSICA (IndexedDB — sem limite de tamanho prático)
+// ══════════════════════════════════════════════════
+let mp3Audio=null,mp3Playing=false,mp3Blob=null,mp3FileName='music.mp3';
+
+async function loadMp3(file){
+  if(!file)return;
+  if(!file.type.startsWith('audio/')){alert('Selecione um arquivo de áudio (MP3 ou WAV).');return;}
+  mp3FileName = file.name.replace(/\s+/g,'_'); // normaliza nome
+  mp3Blob=file;
+  await saveMusic(file);
+  showMp3(file.name, file.size/1024/1024);
+  // auto-preenche nome da música
+  if(!g('f-mTitle')||g('f-mTitle')==='Nossa Música Favorita'){
+    const clean=file.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
+    document.getElementById('f-mTitle').value=clean;
+    meta.musicTitle=clean;
+  }
+  dirty();updateMeter();
+}
+
+function showMp3(name,sizeMB){
+  document.getElementById('mp3Drop').style.display='none';
+  const prev=document.getElementById('mp3Prev');
+  prev.classList.add('on');
+  document.getElementById('mp3Name').textContent=name;
+  document.getElementById('mp3Size').textContent=sizeMB.toFixed(2)+' MB — salvo no IndexedDB (sem limite!)';
+  if(mp3Audio){mp3Audio.pause();mp3Audio=null;}
+  if(mp3Blob){
+    mp3Audio=new Audio(URL.createObjectURL(mp3Blob));
+    mp3Audio.addEventListener('timeupdate',()=>{
+      if(!mp3Audio.duration)return;
+      document.getElementById('mp3PFill').style.width=(mp3Audio.currentTime/mp3Audio.duration*100)+'%';
+    });
+    mp3Audio.addEventListener('ended',()=>{mp3Playing=false;document.getElementById('mp3PlayBtn').textContent='▶';});
+  }
+}
+
+function mp3TogglePlay(){
+  if(!mp3Audio)return;
+  if(mp3Playing){mp3Audio.pause();mp3Playing=false;document.getElementById('mp3PlayBtn').textContent='▶';}
+  else{mp3Audio.play();mp3Playing=true;document.getElementById('mp3PlayBtn').textContent='⏸';}
+}
+
+function mp3Seek(e){
+  if(!mp3Audio||!mp3Audio.duration)return;
+  const r=e.currentTarget.getBoundingClientRect();
+  mp3Audio.currentTime=((e.clientX-r.left)/r.width)*mp3Audio.duration;
+}
+
+async function removeMp3(){
+  if(!confirm('Remover a música?'))return;
+  if(mp3Audio){mp3Audio.pause();mp3Audio=null;}
+  mp3Blob=null;mp3Playing=false;
+  await deleteMusic();
+  document.getElementById('mp3Drop').style.display='block';
+  document.getElementById('mp3Prev').classList.remove('on');
+  dirty();updateMeter();
+}
+
+async function restoreMusic(){
+  const blob=await loadMusic();
+  if(blob){mp3Blob=blob;showMp3(mp3FileName||'música.mp3',blob.size/1024/1024);}
+}
+
+// ══════════════════════════════════════════════════
+// BAKE + ZIP (JSZip)
+// ══════════════════════════════════════════════════
+async function bakeDownload(){
+  collect();saveAll();
+  const btn=document.getElementById('btnBake');
+  const status=document.getElementById('bakeStatus');
+  btn.disabled=true;btn.textContent='⏳ Gerando...';status.textContent='';
+
+  try{
+    // Lê o index.html
+    let html='';
+    try{
+      const resp=await fetch('index.html');
+      if(!resp.ok) throw new Error();
+      html=await resp.text();
+    }catch(e){
+      alert('Erro ao ler index.html.\nCertifique-se de usar um servidor local:\npython -m http.server 3000');
+      btn.disabled=false;btn.textContent='⬇ Baixar pacote completo (.zip)';return;
+    }
+
+    // Monta dados para injetar (sem musicData — música fica como arquivo)
+    const bakeData = {
+      ...meta,
+      photos: photos,
+      musicFile: 'music.mp3' // aponta para arquivo externo
+    };
+
+    // Injeta dados como BAKED_DATA no HTML
+    html = html.replace(
+      'const BAKED_DATA = null;',
+      'const BAKED_DATA = '+JSON.stringify(bakeData)+';'
+    );
+
+    // Cria ZIP
+    const zip=new JSZip();
+    zip.file('index.html', html);
+    zip.file('admin.html', await (await fetch('admin.html')).text());
+    zip.file('netlify.toml', await (await fetch('netlify.toml')).text());
+
+    // Adiciona música se existir
+    const music=await loadMusic();
+    if(music){
+      zip.file('music.mp3', music);
+      status.textContent='✓ Música incluída no pacote';
+    } else {
+      status.textContent='⚠ Nenhuma música carregada — adicione na aba Música';
+    }
+
+    // Gera e baixa
+    const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='retrospectiva-lorrany-lucas.zip';
+    a.click();
+    toast();
+  }finally{
+    btn.disabled=false;btn.textContent='⬇ Baixar pacote completo (.zip)';
+  }
+}
+
+// ══════════════════════════════════════════════════
+// EXPORT JSON
+// ══════════════════════════════════════════════════
+function exportJSON(){
+  collect();
+  const blob=new Blob([JSON.stringify({...meta,photos},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='retrospectiva-dados.json';a.click();
+}
+
+// ══════════════════════════════════════════════════
+// GITHUB SYNC
+// ══════════════════════════════════════════════════
+function loadGhCfg(){
+  try{return JSON.parse(localStorage.getItem('retro_github_cfg')||'{}');}
+  catch(e){return{};}
+}
+
+function fillGhCfg(){
+  const cfg=loadGhCfg();
+  document.getElementById('gh-token').value=cfg.token||'';
+  document.getElementById('gh-owner').value=cfg.owner||'';
+  document.getElementById('gh-repo').value=cfg.repo||'';
+  document.getElementById('gh-branch').value=cfg.branch||'main';
+}
+
+function saveGhCfg(){
+  const cfg={
+    token:document.getElementById('gh-token').value.trim(),
+    owner:document.getElementById('gh-owner').value.trim(),
+    repo:document.getElementById('gh-repo').value.trim(),
+    branch:document.getElementById('gh-branch').value.trim()||'main'
+  };
+  localStorage.setItem('retro_github_cfg',JSON.stringify(cfg));
+  const el=document.getElementById('ghCfgStatus');
+  el.textContent='✓ Salvo localmente';
+  setTimeout(()=>el.textContent='',3000);
+}
+
+function ghLog(msg){
+  const el=document.getElementById('ghSyncLog');
+  if(el) el.innerHTML=msg;
+}
+
+function ghHeaders(cfg){
+  return{
+    'Authorization':'Bearer '+cfg.token,
+    'Accept':'application/vnd.github+json',
+    'X-GitHub-Api-Version':'2022-11-28'
+  };
+}
+
+function textToB64(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
+function bufToB64(buf){
+  const bytes=new Uint8Array(buf);
+  const CHUNK=0x8000;
+  let s='';
+  for(let i=0;i<bytes.length;i+=CHUNK)
+    s+=String.fromCharCode.apply(null,bytes.subarray(i,i+CHUNK));
+  return btoa(s);
+}
+
+async function ghGetSHA(cfg,path){
+  try{
+    const r=await fetch(
+      'https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+'/contents/'+path+'?ref='+cfg.branch,
+      {headers:ghHeaders(cfg)}
+    );
+    if(r.ok) return (await r.json()).sha;
+  }catch(e){}
+  return null;
+}
+
+async function ghPutFile(cfg,path,b64,msg){
+  const sha=await ghGetSHA(cfg,path);
+  const body={
+    message:msg||'🔄 Atualiza retrospectiva — '+new Date().toLocaleDateString('pt-BR'),
+    content:b64,
+    branch:cfg.branch
+  };
+  if(sha) body.sha=sha;
+  const r=await fetch(
+    'https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+'/contents/'+path,
+    {method:'PUT',headers:{...ghHeaders(cfg),'Content-Type':'application/json'},body:JSON.stringify(body)}
+  );
+  if(!r.ok){
+    const err=await r.json().catch(()=>({message:r.statusText}));
+    throw new Error(err.message||r.statusText);
+  }
+  return r.json();
+}
+
+async function syncToGitHub(){
+  const cfg=loadGhCfg();
+  if(!cfg.token||!cfg.owner||!cfg.repo){
+    go('github');
+    ghLog('<span style="color:var(--danger)">⚠ Preencha as credenciais primeiro (token, usuário e repositório).</span>');
+    return;
+  }
+
+  collect();
+  const btn=document.getElementById('btnGhSync');
+  btn.disabled=true;
+  btn.textContent='⏳ Sincronizando...';
+  ghLog('');
+
+  try{
+    saveAll();
+
+    const configData={
+      version:1,
+      lastUpdated:new Date().toISOString(),
+      ...meta,
+      photos,
+      musicFile:'music.mp3'
+    };
+
+    ghLog('📤 Enviando configurações...');
+    await ghPutFile(cfg,'data/config.json',textToB64(JSON.stringify(configData,null,2)),'🔄 Atualiza dados da retrospectiva');
+    ghLog('✓ Configurações enviadas<br>🎵 Verificando música...');
+
+    const music=await loadMusic();
+    if(music){
+      if(music.size>95*1024*1024){
+        ghLog('✓ Configurações enviadas<br>⚠ Música muito grande para o GitHub API (&gt;95MB). Use o fluxo ZIP na aba Deploy para incluí-la.<br><br><strong style="color:var(--green)">🎉 Textos e fotos sincronizados!</strong>');
+      }else{
+        ghLog('✓ Configurações enviadas<br>📤 Enviando música ('+( music.size/1024/1024).toFixed(1)+'MB)...');
+        const ab=await music.arrayBuffer();
+        await ghPutFile(cfg,'music.mp3',bufToB64(ab),'🎵 Atualiza música');
+        ghLog('✓ Configurações enviadas<br>✓ Música enviada<br><br><strong style="color:var(--green)">🎉 Sincronizado! Aguarde ~1 min para o site atualizar.</strong>');
+      }
+    }else{
+      ghLog('✓ Configurações enviadas<br><em style="color:var(--muted)">Nenhuma música carregada</em><br><br><strong style="color:var(--green)">🎉 Sincronizado! Aguarde ~1 min para o site atualizar.</strong>');
+    }
+
+    toast();
+  }catch(e){
+    ghLog('<span style="color:var(--danger)">❌ Erro: '+e.message+'</span>');
+  }finally{
+    btn.disabled=false;
+    btn.textContent='☁ Sincronizar com GitHub';
+  }
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+fill();renderTl();renderPhotos();updCnt();updateMeter();
+</script>
+</body>
+</html>

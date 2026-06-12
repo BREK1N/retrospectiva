@@ -275,59 +275,12 @@ code{background:rgba(255,255,255,0.05);padding:1px 5px;border-radius:4px;font-si
 
 <!-- MÚSICA -->
 <div class="page" id="page-musica">
-  <div class="pg-title">🎧 Música</div>
-  <div class="pg-sub">Upload do arquivo MP3 — fica separado dos dados de texto</div>
+  <div class="pg-title">🎧 Músicas</div>
+  <div class="pg-sub">Adicione uma ou mais faixas para a playlist</div>
   <div class="card">
-    <div class="ct"><div class="d"></div>Informações do Player</div>
-    <div class="r2">
-      <div class="f"><label class="lbl">Emoji</label><input class="inp" id="f-mEmoji" placeholder="♪" oninput="dirty()"></div>
-      <div class="f"></div>
-    </div>
-    <div class="f"><label class="lbl">Nome da música</label><input class="inp" id="f-mTitle" oninput="dirty()"></div>
-    <div class="f"><label class="lbl">Artista</label><input class="inp" id="f-mArtist" oninput="dirty()"></div>
-  </div>
-  <div class="card">
-    <div class="ct"><div class="d"></div>Arquivo de Áudio</div>
-
-    <!-- Preview de áudio (quando carregado) -->
-    <div class="mp3-prev" id="mp3Prev">
-      <div style="display:flex;align-items:center;gap:10px">
-        <button id="mp3PlayBtn" onclick="mp3TogglePlay()"
-          style="width:36px;height:36px;border-radius:50%;background:var(--green);border:none;color:#000;font-size:14px;cursor:pointer;flex-shrink:0">▶</button>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:500" id="mp3Name">—</div>
-          <div style="font-size:11px;color:var(--muted)" id="mp3Size">—</div>
-        </div>
-        <button onclick="removeMp3()" style="padding:5px 10px;background:transparent;
-          border:1px solid rgba(231,76,60,.4);border-radius:6px;color:var(--danger);font-size:11px;cursor:pointer">
-          ✕ Remover
-        </button>
-      </div>
-      <div class="mp3-pbar" onclick="mp3Seek(event)"><div class="mp3-pfill" id="mp3PFill"></div></div>
-    </div>
-
-    <input type="file" id="fMp3" accept="audio/mp3,audio/mpeg,audio/wav,audio/*" style="display:none" onchange="loadMp3(this.files[0])">
-
-    <div class="mp3-drop" id="mp3Drop"
-      onclick="document.getElementById('fMp3').click()"
-      ondragover="event.preventDefault();this.classList.add('drag')"
-      ondragleave="this.classList.remove('drag')"
-      ondrop="event.preventDefault();this.classList.remove('drag');loadMp3(event.dataTransfer.files[0])">
-      <div style="font-size:30px;margin-bottom:7px">🎵</div>
-      <div style="font-size:14px;font-weight:500">Clique ou arraste o MP3 aqui</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:5px">MP3 / WAV • qualquer tamanho</div>
-    </div>
-
-    <div style="background:rgba(255,209,102,0.07);border:1px solid rgba(255,209,102,0.2);border-radius:9px;padding:13px;margin-top:14px">
-      <div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:5px">💡 Como funciona</div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.7">
-        A música <strong style="color:var(--text)">não fica no localStorage</strong> — fica salva separadamente no navegador (IndexedDB). 
-        Na hora de gerar o arquivo para deploy, o botão 
-        <strong style="color:var(--pink)">"Baixar pacote completo"</strong> na aba Deploy 
-        vai baixar um <code>.zip</code> com o <code>index.html</code> + o arquivo <code>music.mp3</code> prontos.
-        Assim não tem limite de espaço para a música! 🎵
-      </div>
-    </div>
+    <div class="ct"><div class="d"></div>Playlist <span style="color:var(--muted);font-size:11px;margin-left:auto;font-weight:400" id="trackCount">0 faixas</span></div>
+    <div id="trackList" style="display:flex;flex-direction:column;gap:12px"></div>
+    <button class="badd" onclick="addTrack()" style="margin-top:10px">＋ Adicionar Música</button>
   </div>
 </div>
 
@@ -410,7 +363,14 @@ code{background:rgba(255,255,255,0.05);padding:1px 5px;border-radius:4px;font-si
       Envia <strong style="color:var(--text)">todos os dados</strong> (textos, fotos e música) para o repositório.
       Qualquer dispositivo que abrir o site verá as informações atualizadas.
     </p>
-    <button class="bsave" id="btnGhSync" onclick="syncToGitHub()" style="background:var(--blue);color:#0a0a0f">☁ Sincronizar com GitHub</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+      <button class="bsave" id="btnSaveLocal" onclick="saveLocally()" style="background:var(--green);color:#000">💾 Salvar no computador</button>
+      <button class="bsave ghost" id="btnGhSync" onclick="syncToGitHub()">☁ Via API GitHub</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted)">
+      <strong style="color:var(--text)">Salvar no computador</strong> → salva os arquivos na pasta do projeto → dê duplo clique em <code>sync.bat</code> para enviar ao GitHub.<br>
+      <strong style="color:var(--text)">Via API GitHub</strong> → envia direto do browser (requer acesso a api.github.com).
+    </div>
     <div id="ghSyncLog" style="margin-top:14px;font-size:12px;line-height:2;color:var(--muted)"></div>
   </div>
 
@@ -462,15 +422,23 @@ const DEF_META = {
     {emoji:"🎉",color:"green",date:"Jun 2023",title:"Aniversário do Namoro",desc:"Um ano de risadas e descobertas."},
     {emoji:"✈️",color:"blue",date:"Dez 2023",title:"Viagem Inesquecível",desc:"A melhor viagem sempre é ao lado de você."}
   ],
-  photos:[] // [{data: base64_comprimida, caption:''}]
+  photos:[], // [{data: base64_comprimida, caption:''}]
+  tracks:[]  // [{id, emoji, name, artist}]
 };
 
 // Fotos: salvas em chave separada (retro_photos) para não misturar com meta
 // Música: salva em IndexedDB (retro_music)
 
 function loadMeta(){
-  try{const r=localStorage.getItem('retro_meta');return r?{...DEF_META,...JSON.parse(r)}:{...DEF_META};}
-  catch(e){return{...DEF_META};}
+  try{
+    const r=localStorage.getItem('retro_meta');
+    const m=r?{...DEF_META,...JSON.parse(r)}:{...DEF_META};
+    // migra formato antigo (musicTitle) para tracks[]
+    if((!m.tracks||!m.tracks.length)&&(m.musicTitle||m.musicEmoji))
+      m.tracks=[{id:'legacy',emoji:m.musicEmoji||'♪',name:m.musicTitle||'',artist:m.musicArtist||''}];
+    if(!m.tracks) m.tracks=[];
+    return m;
+  }catch(e){return{...DEF_META,tracks:[]};}
 }
 function loadPhotos(){
   try{const r=localStorage.getItem('retro_photos');return r?JSON.parse(r):[];}
@@ -481,7 +449,7 @@ let meta = loadMeta();
 let photos = loadPhotos();
 let unsaved = false;
 
-// ── IndexedDB para música ──────────────────────────────────
+// ── IndexedDB (multi-faixa) ────────────────────────────────
 const IDB_NAME='retro_idb', IDB_STORE='music';
 let db=null;
 function openDB(){
@@ -493,33 +461,20 @@ function openDB(){
     req.onerror=()=>rej();
   });
 }
-async function saveMusic(blob){
+async function idbSet(key,val){
   const d=await openDB();
-  return new Promise((res,rej)=>{
-    const tx=d.transaction(IDB_STORE,'readwrite');
-    tx.objectStore(IDB_STORE).put(blob,'track');
-    tx.oncomplete=res;tx.onerror=rej;
-  });
+  return new Promise((res,rej)=>{const tx=d.transaction(IDB_STORE,'readwrite');tx.objectStore(IDB_STORE).put(val,key);tx.oncomplete=res;tx.onerror=rej;});
 }
-async function loadMusic(){
-  try{
-    const d=await openDB();
-    return new Promise((res)=>{
-      const tx=d.transaction(IDB_STORE,'readonly');
-      const req=tx.objectStore(IDB_STORE).get('track');
-      req.onsuccess=()=>res(req.result||null);
-      req.onerror=()=>res(null);
-    });
-  }catch(e){return null;}
+async function idbGet(key){
+  try{const d=await openDB();return new Promise(res=>{const tx=d.transaction(IDB_STORE,'readonly');const req=tx.objectStore(IDB_STORE).get(key);req.onsuccess=()=>res(req.result||null);req.onerror=()=>res(null);});}catch(e){return null;}
 }
-async function deleteMusic(){
+async function idbDel(key){
   const d=await openDB();
-  return new Promise(res=>{
-    const tx=d.transaction(IDB_STORE,'readwrite');
-    tx.objectStore(IDB_STORE).delete('track');
-    tx.oncomplete=res;
-  });
+  return new Promise(res=>{const tx=d.transaction(IDB_STORE,'readwrite');tx.objectStore(IDB_STORE).delete(key);tx.oncomplete=res;});
 }
+async function saveTrackBlob(id,blob){return idbSet('track_'+id,blob);}
+async function loadTrackBlob(id){return idbGet('track_'+id);}
+async function deleteTrackBlob(id){return idbDel('track_'+id);}
 
 // ══════════════════════════════════════════════════
 // STORAGE METER
@@ -542,10 +497,11 @@ async function updateMeter(){
   document.getElementById('storMeta').textContent=`Dados: ${kb(metaStr)}`;
   document.getElementById('storPhotos').textContent=`Fotos: ${kb(photoStr)}`;
 
-  const music = await loadMusic();
-  document.getElementById('storMusic').textContent = music
-    ? `Música: ${(music.size/1024).toFixed(0)}KB (IndexedDB ✓)`
-    : 'Música: não carregada';
+  let tCnt=0,tBytes=0;
+  for(const t of (meta.tracks||[])){if(t._blob){tCnt++;tBytes+=t._blob.size;}}
+  document.getElementById('storMusic').textContent=tCnt>0
+    ?`Música: ${tCnt} faixa${tCnt>1?'s':''} · ${(tBytes/1024).toFixed(0)}KB (IndexedDB ✓)`
+    :'Música: não carregada';
 }
 
 // ══════════════════════════════════════════════════
@@ -562,7 +518,7 @@ function go(id){
   if(id==='timeline') renderTl();
   if(id==='galeria'){renderPhotos();updateMeter();}
   if(id==='contador') updCnt();
-  if(id==='musica') restoreMusic();
+  if(id==='musica'){restoreTracks();renderTracks();}
   if(id==='deploy') updateMeter();
   if(id==='github') fillGhCfg();
 }
@@ -577,7 +533,6 @@ function fill(){
   s('f-n1',meta.name1);s('f-n2',meta.name2);
   s('f-eye',meta.eyebrow);s('f-sub',meta.subtitle);s('f-emoji',meta.heroEmoji);
   s('f-date',meta.startDate);
-  s('f-mEmoji',meta.musicEmoji);s('f-mTitle',meta.musicTitle);s('f-mArtist',meta.musicArtist);
   s('f-llbl',meta.letterLabel);s('f-ltxt',meta.letterText);s('f-lsig',meta.letterSig);
   s('f-galtit',meta.galleryTitle);
 }
@@ -586,7 +541,6 @@ function collect(){
   meta.name1=g('f-n1')||meta.name1; meta.name2=g('f-n2')||meta.name2;
   meta.eyebrow=g('f-eye'); meta.subtitle=g('f-sub'); meta.heroEmoji=g('f-emoji');
   meta.startDate=g('f-date');
-  meta.musicEmoji=g('f-mEmoji'); meta.musicTitle=g('f-mTitle'); meta.musicArtist=g('f-mArtist');
   meta.letterLabel=g('f-llbl'); meta.letterText=g('f-ltxt'); meta.letterSig=g('f-lsig');
   meta.galleryTitle=g('f-galtit');
 }
@@ -603,9 +557,10 @@ function dirty(){
 function saveAll(){
   collect();
   try{
-    // Salva meta (sem fotos, sem música)
     const metaOnly = {...meta};
-    delete metaOnly.photos; // garantia
+    delete metaOnly.photos;
+    // remove props runtime das tracks antes de salvar
+    if(metaOnly.tracks) metaOnly.tracks=metaOnly.tracks.map(({id,emoji,name,artist})=>({id,emoji,name,artist}));
     localStorage.setItem('retro_meta', JSON.stringify(metaOnly));
     // Fotos separadas
     localStorage.setItem('retro_photos', JSON.stringify(photos));
@@ -738,68 +693,141 @@ function updCnt(){
 }
 
 // ══════════════════════════════════════════════════
-// MÚSICA (IndexedDB — sem limite de tamanho prático)
+// MÚSICAS — multi-faixa
 // ══════════════════════════════════════════════════
-let mp3Audio=null,mp3Playing=false,mp3Blob=null,mp3FileName='music.mp3';
+let trackAudios={}, trackPlaying=null;
 
-async function loadMp3(file){
-  if(!file)return;
-  if(!file.type.startsWith('audio/')){alert('Selecione um arquivo de áudio (MP3 ou WAV).');return;}
-  mp3FileName = file.name.replace(/\s+/g,'_'); // normaliza nome
-  mp3Blob=file;
-  await saveMusic(file);
-  showMp3(file.name, file.size/1024/1024);
-  // auto-preenche nome da música
-  if(!g('f-mTitle')||g('f-mTitle')==='Nossa Música Favorita'){
-    const clean=file.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
-    document.getElementById('f-mTitle').value=clean;
-    meta.musicTitle=clean;
-  }
-  dirty();updateMeter();
+function renderTracks(){
+  const list=document.getElementById('trackList');
+  if(!list)return;
+  list.innerHTML='';
+  (meta.tracks||[]).forEach((t,i)=>{
+    const hasBlob=!!t._blob;
+    const card=document.createElement('div');card.className='tled';
+    card.innerHTML=`
+      <div class="tled-h">
+        <span class="tled-n">Faixa ${String(i+1).padStart(2,'0')}</span>
+        <div class="tled-a">
+          ${i>0?`<button class="bsm" onclick="mvTrack('${t.id}',-1)">↑</button>`:''}
+          ${i<meta.tracks.length-1?`<button class="bsm" onclick="mvTrack('${t.id}',1)">↓</button>`:''}
+          <button class="bsm del" onclick="rmTrack('${t.id}')">✕</button>
+        </div>
+      </div>
+      <div class="r3">
+        <div class="f"><label class="lbl">Emoji</label>
+          <input class="inp" value="${t.emoji||'♪'}" oninput="meta.tracks[${i}].emoji=this.value;dirty()"></div>
+        <div class="f"><label class="lbl">Nome</label>
+          <input class="inp" value="${t.name||''}" placeholder="Nome da música" oninput="meta.tracks[${i}].name=this.value;dirty()"></div>
+        <div class="f"><label class="lbl">Artista</label>
+          <input class="inp" value="${t.artist||''}" placeholder="Artista" oninput="meta.tracks[${i}].artist=this.value;dirty()"></div>
+      </div>
+      <div class="mp3-prev ${hasBlob?'on':''}" id="tp-${t.id}">
+        <div style="display:flex;align-items:center;gap:10px">
+          <button id="tpbtn-${t.id}" onclick="tPlayToggle('${t.id}')"
+            style="width:32px;height:32px;border-radius:50%;background:var(--green);border:none;color:#000;font-size:13px;cursor:pointer;flex-shrink:0">▶</button>
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:500">${t._fileName||t.name||'—'}</div>
+            <div style="font-size:10px;color:var(--muted)">${hasBlob?(t._blob.size/1024/1024).toFixed(2)+' MB — IndexedDB ✓':''}</div>
+          </div>
+          <button onclick="rmTrackAudio('${t.id}')" style="padding:4px 8px;background:transparent;border:1px solid rgba(231,76,60,.4);border-radius:5px;color:var(--danger);font-size:11px;cursor:pointer">✕</button>
+        </div>
+        <div class="mp3-pbar" onclick="tSeek(event,'${t.id}')"><div class="mp3-pfill" id="tpfill-${t.id}"></div></div>
+      </div>
+      <input type="file" id="tf-${t.id}" accept="audio/*" style="display:none" onchange="loadTrackFile('${t.id}',this.files[0])">
+      <div class="mp3-drop" id="td-${t.id}" style="${hasBlob?'display:none':''}"
+        onclick="document.getElementById('tf-${t.id}').click()"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')"
+        ondrop="event.preventDefault();this.classList.remove('drag');loadTrackFile('${t.id}',event.dataTransfer.files[0])">
+        <div style="font-size:26px;margin-bottom:6px">🎵</div>
+        <div style="font-size:13px;font-weight:500">Clique ou arraste o MP3</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">MP3 / WAV • qualquer tamanho</div>
+      </div>`;
+    list.appendChild(card);
+  });
+  document.getElementById('trackCount').textContent=(meta.tracks||[]).length+' faixa'+(((meta.tracks||[]).length!==1)?'s':'');
 }
 
-function showMp3(name,sizeMB){
-  document.getElementById('mp3Drop').style.display='none';
-  const prev=document.getElementById('mp3Prev');
-  prev.classList.add('on');
-  document.getElementById('mp3Name').textContent=name;
-  document.getElementById('mp3Size').textContent=sizeMB.toFixed(2)+' MB — salvo no IndexedDB (sem limite!)';
-  if(mp3Audio){mp3Audio.pause();mp3Audio=null;}
-  if(mp3Blob){
-    mp3Audio=new Audio(URL.createObjectURL(mp3Blob));
-    mp3Audio.addEventListener('timeupdate',()=>{
-      if(!mp3Audio.duration)return;
-      document.getElementById('mp3PFill').style.width=(mp3Audio.currentTime/mp3Audio.duration*100)+'%';
+function addTrack(){
+  if(!meta.tracks)meta.tracks=[];
+  const id=Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  meta.tracks.push({id,emoji:'♪',name:'',artist:''});
+  renderTracks();dirty();
+}
+
+function rmTrack(id){
+  if(!confirm('Remover esta faixa?'))return;
+  meta.tracks=(meta.tracks||[]).filter(t=>t.id!==id);
+  deleteTrackBlob(id);
+  if(trackAudios[id]){trackAudios[id].pause();delete trackAudios[id];}
+  if(trackPlaying===id)trackPlaying=null;
+  renderTracks();dirty();
+}
+
+function mvTrack(id,dir){
+  const arr=meta.tracks||[];
+  const i=arr.findIndex(t=>t.id===id);
+  if(i<0)return;
+  const ni=i+dir;
+  if(ni<0||ni>=arr.length)return;
+  [arr[i],arr[ni]]=[arr[ni],arr[i]];
+  renderTracks();dirty();
+}
+
+async function loadTrackFile(id,file){
+  if(!file||!file.type.startsWith('audio/')){alert('Selecione um arquivo de áudio.');return;}
+  const t=(meta.tracks||[]).find(t=>t.id===id);
+  if(!t)return;
+  await saveTrackBlob(id,file);
+  t._blob=file;t._fileName=file.name;
+  if(!t.name)t.name=file.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
+  renderTracks();dirty();updateMeter();
+}
+
+async function rmTrackAudio(id){
+  if(!confirm('Remover o áudio desta faixa?'))return;
+  const t=(meta.tracks||[]).find(t=>t.id===id);
+  if(t){t._blob=null;t._fileName=null;}
+  await deleteTrackBlob(id);
+  if(trackAudios[id]){trackAudios[id].pause();delete trackAudios[id];}
+  if(trackPlaying===id)trackPlaying=null;
+  renderTracks();dirty();updateMeter();
+}
+
+function tPlayToggle(id){
+  const t=(meta.tracks||[]).find(t=>t.id===id);
+  if(!t||!t._blob)return;
+  if(trackPlaying&&trackPlaying!==id&&trackAudios[trackPlaying]){
+    trackAudios[trackPlaying].pause();
+    const b=document.getElementById('tpbtn-'+trackPlaying);if(b)b.textContent='▶';
+    trackPlaying=null;
+  }
+  if(!trackAudios[id]){
+    trackAudios[id]=new Audio(URL.createObjectURL(t._blob));
+    trackAudios[id].addEventListener('timeupdate',()=>{
+      if(!trackAudios[id].duration)return;
+      const f=document.getElementById('tpfill-'+id);if(f)f.style.width=(trackAudios[id].currentTime/trackAudios[id].duration*100)+'%';
     });
-    mp3Audio.addEventListener('ended',()=>{mp3Playing=false;document.getElementById('mp3PlayBtn').textContent='▶';});
+    trackAudios[id].addEventListener('ended',()=>{const b=document.getElementById('tpbtn-'+id);if(b)b.textContent='▶';trackPlaying=null;});
   }
+  const btn=document.getElementById('tpbtn-'+id);
+  if(trackPlaying===id){trackAudios[id].pause();btn.textContent='▶';trackPlaying=null;}
+  else{trackAudios[id].play();btn.textContent='⏸';trackPlaying=id;}
 }
 
-function mp3TogglePlay(){
-  if(!mp3Audio)return;
-  if(mp3Playing){mp3Audio.pause();mp3Playing=false;document.getElementById('mp3PlayBtn').textContent='▶';}
-  else{mp3Audio.play();mp3Playing=true;document.getElementById('mp3PlayBtn').textContent='⏸';}
-}
-
-function mp3Seek(e){
-  if(!mp3Audio||!mp3Audio.duration)return;
+function tSeek(e,id){
+  if(!trackAudios[id]||!trackAudios[id].duration)return;
   const r=e.currentTarget.getBoundingClientRect();
-  mp3Audio.currentTime=((e.clientX-r.left)/r.width)*mp3Audio.duration;
+  trackAudios[id].currentTime=((e.clientX-r.left)/r.width)*trackAudios[id].duration;
 }
 
-async function removeMp3(){
-  if(!confirm('Remover a música?'))return;
-  if(mp3Audio){mp3Audio.pause();mp3Audio=null;}
-  mp3Blob=null;mp3Playing=false;
-  await deleteMusic();
-  document.getElementById('mp3Drop').style.display='block';
-  document.getElementById('mp3Prev').classList.remove('on');
-  dirty();updateMeter();
-}
-
-async function restoreMusic(){
-  const blob=await loadMusic();
-  if(blob){mp3Blob=blob;showMp3(mp3FileName||'música.mp3',blob.size/1024/1024);}
+async function restoreTracks(){
+  if(!meta.tracks||!meta.tracks.length)return;
+  for(const t of meta.tracks){
+    if(t._blob)continue;
+    const blob=await loadTrackBlob(t.id);
+    if(blob){t._blob=blob;t._fileName=t.name||'música.mp3';}
+  }
 }
 
 // ══════════════════════════════════════════════════
@@ -823,11 +851,12 @@ async function bakeDownload(){
       btn.disabled=false;btn.textContent='⬇ Baixar pacote completo (.zip)';return;
     }
 
-    // Monta dados para injetar (sem musicData — música fica como arquivo)
+    // Monta tracks limpas (sem props runtime)
+    const cleanTracks=(meta.tracks||[]).map(({id,emoji,name,artist})=>({id,emoji,name,artist,file:'music_'+id+'.mp3'}));
     const bakeData = {
       ...meta,
-      photos: photos,
-      musicFile: 'music.mp3' // aponta para arquivo externo
+      tracks: cleanTracks,
+      photos,
     };
 
     // Injeta dados como BAKED_DATA no HTML
@@ -840,16 +869,16 @@ async function bakeDownload(){
     const zip=new JSZip();
     zip.file('index.html', html);
     zip.file('admin.html', await (await fetch('admin.html')).text());
-    zip.file('netlify.toml', await (await fetch('netlify.toml')).text());
+    zip.file('data/config.json', await (await fetch('data/config.json')).text().catch(()=>'{}'));
+    zip.file('.nojekyll', '');
 
-    // Adiciona música se existir
-    const music=await loadMusic();
-    if(music){
-      zip.file('music.mp3', music);
-      status.textContent='✓ Música incluída no pacote';
-    } else {
-      status.textContent='⚠ Nenhuma música carregada — adicione na aba Música';
+    // Adiciona músicas
+    let musicFiles=0;
+    for(const t of (meta.tracks||[])){
+      const blob=await loadTrackBlob(t.id);
+      if(blob){zip.file('music_'+t.id+'.mp3',blob);musicFiles++;}
     }
+    status.textContent=musicFiles>0?`✓ ${musicFiles} música(s) incluída(s) no pacote`:'⚠ Nenhuma música carregada — adicione na aba Músicas';
 
     // Gera e baixa
     const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
@@ -884,8 +913,8 @@ function loadGhCfg(){
 function fillGhCfg(){
   const cfg=loadGhCfg();
   document.getElementById('gh-token').value=cfg.token||'';
-  document.getElementById('gh-owner').value=cfg.owner||'';
-  document.getElementById('gh-repo').value=cfg.repo||'';
+  document.getElementById('gh-owner').value=cfg.owner||'BREK1N';
+  document.getElementById('gh-repo').value=cfg.repo||'retrospectiva';
   document.getElementById('gh-branch').value=cfg.branch||'main';
 }
 
@@ -975,31 +1004,32 @@ async function syncToGitHub(){
   try{
     saveAll();
 
+    const cleanTracks=(meta.tracks||[]).map(({id,emoji,name,artist})=>({id,emoji,name,artist,file:'music_'+id+'.mp3'}));
     const configData={
       version:1,
       lastUpdated:new Date().toISOString(),
       ...meta,
+      tracks:cleanTracks,
       photos,
-      musicFile:'music.mp3'
     };
 
     ghLog('📤 Enviando configurações...');
     await ghPutFile(cfg,'data/config.json',textToB64(JSON.stringify(configData,null,2)),'🔄 Atualiza dados da retrospectiva');
-    ghLog('✓ Configurações enviadas<br>🎵 Verificando música...');
 
-    const music=await loadMusic();
-    if(music){
-      if(music.size>95*1024*1024){
-        ghLog('✓ Configurações enviadas<br>⚠ Música muito grande para o GitHub API (&gt;95MB). Use o fluxo ZIP na aba Deploy para incluí-la.<br><br><strong style="color:var(--green)">🎉 Textos e fotos sincronizados!</strong>');
-      }else{
-        ghLog('✓ Configurações enviadas<br>📤 Enviando música ('+( music.size/1024/1024).toFixed(1)+'MB)...');
-        const ab=await music.arrayBuffer();
-        await ghPutFile(cfg,'music.mp3',bufToB64(ab),'🎵 Atualiza música');
-        ghLog('✓ Configurações enviadas<br>✓ Música enviada<br><br><strong style="color:var(--green)">🎉 Sincronizado! Aguarde ~1 min para o site atualizar.</strong>');
+    let musicSent=0;
+    const tracksWithBlob=(meta.tracks||[]).filter(t=>t._blob);
+    for(const t of tracksWithBlob){
+      if(t._blob.size>95*1024*1024){
+        ghLog(`✓ Configs enviadas<br>⚠ "${t.name}" muito grande (&gt;95MB). Use "Salvar no computador".`);
+        continue;
       }
-    }else{
-      ghLog('✓ Configurações enviadas<br><em style="color:var(--muted)">Nenhuma música carregada</em><br><br><strong style="color:var(--green)">🎉 Sincronizado! Aguarde ~1 min para o site atualizar.</strong>');
+      ghLog(`✓ Configs enviadas<br>📤 Enviando música ${musicSent+1}/${tracksWithBlob.length}: ${t.name||t.id}...`);
+      const ab=await t._blob.arrayBuffer();
+      await ghPutFile(cfg,'music_'+t.id+'.mp3',bufToB64(ab),'🎵 '+t.name);
+      musicSent++;
     }
+    const resumo=tracksWithBlob.length?`✓ ${musicSent} música(s) enviada(s)`:'<em style="color:var(--muted)">Sem músicas carregadas</em>';
+    ghLog(`✓ Configurações enviadas<br>${resumo}<br><br><strong style="color:var(--green)">🎉 Sincronizado! Aguarde ~1 min para o site atualizar.</strong>`);
 
     toast();
   }catch(e){
@@ -1007,6 +1037,57 @@ async function syncToGitHub(){
   }finally{
     btn.disabled=false;
     btn.textContent='☁ Sincronizar com GitHub';
+  }
+}
+
+// ══════════════════════════════════════════════════
+// SALVAR LOCALMENTE (File System Access API)
+// ══════════════════════════════════════════════════
+let _projectDir=null;
+
+async function saveLocally(){
+  if(!window.showDirectoryPicker){
+    ghLog('<span style="color:var(--danger)">❌ Seu browser não suporta esta função. Use Chrome ou Edge.</span>');
+    return;
+  }
+  const btn=document.getElementById('btnSaveLocal');
+  btn.disabled=true;btn.textContent='⏳ Salvando...';
+  ghLog('');
+  try{
+    if(!_projectDir){
+      _projectDir=await window.showDirectoryPicker({id:'retrospectiva',mode:'readwrite'});
+    }
+    collect();saveAll();
+
+    const cleanTracks=(meta.tracks||[]).map(({id,emoji,name,artist})=>({id,emoji,name,artist,file:'music_'+id+'.mp3'}));
+    const configData={version:1,lastUpdated:new Date().toISOString(),...meta,tracks:cleanTracks,photos};
+
+    // Escreve data/config.json
+    const dataDir=await _projectDir.getDirectoryHandle('data',{create:true});
+    const cfgHandle=await dataDir.getFileHandle('config.json',{create:true});
+    const w=await cfgHandle.createWritable();
+    await w.write(JSON.stringify(configData,null,2));
+    await w.close();
+
+    // Escreve arquivos de música
+    let mSaved=0;
+    for(const t of (meta.tracks||[])){
+      const blob=await loadTrackBlob(t.id);
+      if(blob){
+        const fh=await _projectDir.getFileHandle('music_'+t.id+'.mp3',{create:true});
+        const w2=await fh.createWritable();
+        await w2.write(blob);
+        await w2.close();
+        mSaved++;
+      }
+    }
+
+    ghLog(`✓ data/config.json salvo<br>✓ ${mSaved} arquivo(s) de música salvos<br><br>Agora dê <strong>duplo clique em sync.bat</strong> na pasta do projeto para enviar ao GitHub. 🚀`);
+    toast();
+  }catch(e){
+    if(e.name!=='AbortError') ghLog('<span style="color:var(--danger)">❌ Erro: '+e.message+'</span>');
+  }finally{
+    btn.disabled=false;btn.textContent='💾 Salvar no computador';
   }
 }
 

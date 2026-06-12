@@ -324,7 +324,9 @@ html,body{width:100%;height:100%;background:var(--deep);color:var(--text);
         <div class="eq-bar off"></div>
       </div>
       <button class="vol-btn" id="volBtn" onclick="toggleMute()">🔊</button>
+      <button class="vol-btn" id="prevBtn" onclick="prevTrack()" style="display:none">⏮</button>
       <button class="play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+      <button class="vol-btn" id="nextBtn" onclick="nextTrack()" style="display:none">⏭</button>
     </div>
   </div>
   <div class="prog-wrap" id="progWrap" onclick="seek(event)">
@@ -346,6 +348,7 @@ const DEF = {
   startDate:"2023-01-15",
   musicTitle:"Nossa Música Favorita",musicArtist:"A definir",musicEmoji:"♪",
   musicFile:"music.mp3",
+  tracks:[],
   letterLabel:"Para Lorrany",
   letterText:"Você transformou os meus dias em algo que eu não sabia que era possível.\n\nCada momento ao seu lado é uma música nova, uma que quero ouvir pra sempre.\n\nObrigado por ser exatamente quem você é — e por escolher estar aqui, comigo.",
   letterSig:"Com amor, Lucas 🌹",
@@ -445,28 +448,68 @@ async function init(){
   document.getElementById('qrS').innerHTML   = D.name1+' &amp; '+D.name2+'<br>Presente digital exclusivo';
   try{new QRCode(document.getElementById('qrcode'),{text:location.href,width:72,height:72,colorDark:'#111',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
 
-  // player info
-  document.getElementById('pArt').textContent    = D.musicEmoji||'♪';
-  document.getElementById('pTitle').textContent  = D.musicTitle;
-  document.getElementById('pArtist').textContent = D.musicArtist;
+  // normaliza tracks (compat com formato antigo)
+  if(!D.tracks||!D.tracks.length){
+    if(D.musicFile||D.musicData)
+      D.tracks=[{id:'legacy',emoji:D.musicEmoji||'♪',name:D.musicTitle||'Música',artist:D.musicArtist||'',file:D.musicFile,musicData:D.musicData}];
+    else D.tracks=[];
+  }
+
+  // player info (primeira faixa)
+  const t0=D.tracks[0]||{};
+  document.getElementById('pArt').textContent    = t0.emoji||D.musicEmoji||'♪';
+  document.getElementById('pTitle').textContent  = t0.name||D.musicTitle||'Música';
+  document.getElementById('pArtist').textContent = t0.artist||D.musicArtist||'';
+
+  // mostra prev/next se tiver mais de uma faixa
+  if(D.tracks.length>1){
+    document.getElementById('prevBtn').style.display='flex';
+    document.getElementById('nextBtn').style.display='flex';
+  }
 }
 init();
 
 // ── ÁUDIO ──────────────────────────────────────────────────
-let audio=null, muted=false;
+let audio=null, muted=false, currentTrackIdx=0;
+
+function loadTrackIdx(idx, autoplay=false){
+  if(!D.tracks||!D.tracks[idx])return false;
+  const t=D.tracks[idx];
+  currentTrackIdx=idx;
+  const src=t.musicData||(t.file?t.file:null);
+  if(!src)return false;
+  if(audio){audio.pause();audio.removeEventListener('timeupdate',onTick);}
+  audio=new Audio(src);
+  audio.volume=muted?0:0.8;
+  audio.loop=(D.tracks.length===1);
+  audio.addEventListener('timeupdate',onTick);
+  audio.addEventListener('loadedmetadata',()=>{document.getElementById('tDur').textContent=fmt(audio.duration);});
+  audio.addEventListener('ended',()=>{
+    if(D.tracks.length>1&&currentTrackIdx<D.tracks.length-1) nextTrack(true);
+    else setPlaying(false);
+  });
+  document.getElementById('pArt').textContent=t.emoji||'♪';
+  document.getElementById('pTitle').textContent=t.name||'Música';
+  document.getElementById('pArtist').textContent=t.artist||'';
+  if(autoplay) audio.play().then(()=>setPlaying(true)).catch(()=>setPlaying(false));
+  return true;
+}
+
+function nextTrack(auto=false){
+  if(!D.tracks||D.tracks.length<=1)return;
+  const wasPlaying=audio&&!audio.paused;
+  loadTrackIdx((currentTrackIdx+1)%D.tracks.length, wasPlaying||auto);
+}
+
+function prevTrack(){
+  if(!D.tracks||D.tracks.length<=1)return;
+  const wasPlaying=audio&&!audio.paused;
+  loadTrackIdx((currentTrackIdx-1+D.tracks.length)%D.tracks.length, wasPlaying);
+}
 
 function initAudio(){
-  // Prioridade: base64 embutida > arquivo externo
-  const src = D.musicData || (D.musicFile ? D.musicFile : null);
-  if(!src) return false;
-  audio = new Audio(src);
-  audio.loop = true;
-  audio.volume = 0.8;
-  audio.addEventListener('timeupdate', onTick);
-  audio.addEventListener('loadedmetadata',()=>{
-    document.getElementById('tDur').textContent = fmt(audio.duration);
-  });
-  return true;
+  if(!D.tracks||!D.tracks.length)return false;
+  return loadTrackIdx(0);
 }
 
 function fmt(s){

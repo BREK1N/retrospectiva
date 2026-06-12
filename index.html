@@ -125,6 +125,8 @@ html,body{width:100%;height:100%;background:var(--deep);color:var(--text);
 .s2-card-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
 .s2-card-num{font-family:'Playfair Display',serif;font-size:clamp(24px,7vw,34px);font-weight:900;line-height:1;
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.s2-num-pink{background:linear-gradient(135deg,#fff 30%,var(--pink))}
+.s2-num-green{background:linear-gradient(135deg,#fff 30%,var(--green))}
 .s2-card-unit{font-size:10px;color:var(--muted);margin-top:3px}
 .s2-card-since{font-size:9px;color:var(--muted);margin-top:2px}
 
@@ -246,13 +248,13 @@ html,body{width:100%;height:100%;background:var(--deep);color:var(--text);
       <div class="s2-mini">
         <div class="s2-card">
           <div class="s2-card-lbl" style="color:var(--pink)">Primeiro Beijo</div>
-          <div class="s2-card-num" id="kissCount" style="background:linear-gradient(135deg,#fff 30%,var(--pink))">—</div>
+          <div class="s2-card-num s2-num-pink" id="kissCount">—</div>
           <div class="s2-card-unit">dias de beijos</div>
           <div class="s2-card-since" id="kissTxt"></div>
         </div>
         <div class="s2-card">
           <div class="s2-card-lbl" style="color:var(--green)">Nos Conhecemos</div>
-          <div class="s2-card-num" id="metCount" style="background:linear-gradient(135deg,#fff 30%,var(--green))">—</div>
+          <div class="s2-card-num s2-num-green" id="metCount">—</div>
           <div class="s2-card-unit">dias de história</div>
           <div class="s2-card-since" id="metTxt"></div>
         </div>

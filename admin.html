@@ -215,13 +215,31 @@ code{background:rgba(255,255,255,0.05);padding:1px 5px;border-radius:4px;font-si
   <div class="pg-title">💕 Contador de Dias</div>
   <div class="pg-sub">Calculado automaticamente</div>
   <div class="card">
-    <div class="ct"><div class="d"></div>Data de início</div>
+    <div class="ct"><div class="d"></div>Data de início do namoro</div>
     <div class="f"><label class="lbl">Quando o namoro começou?</label>
       <input class="inp" type="date" id="f-date" oninput="dirty();updCnt()"></div>
-    <div style="background:rgba(247,37,133,0.07);border:1px solid rgba(247,37,133,0.18);border-radius:9px;padding:14px">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:5px">Preview</div>
+    <div class="ct" style="margin-top:12px"><div class="d"></div>Data do primeiro beijo</div>
+    <div class="f"><label class="lbl">Quando foi o primeiro beijo?</label>
+      <input class="inp" type="date" id="f-kissDate" oninput="dirty();updCnt()"></div>
+    <div class="ct" style="margin-top:12px"><div class="d"></div>Data que se conheceram</div>
+    <div class="f"><label class="lbl">Quando vocês se conheceram?</label>
+      <input class="inp" type="date" id="f-metDate" oninput="dirty();updCnt()"></div>
+    <div style="background:rgba(247,37,133,0.07);border:1px solid rgba(247,37,133,0.18);border-radius:9px;padding:14px;margin-top:10px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Preview</div>
       <div style="font-size:34px;font-weight:700" id="cntPrev">—</div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px" id="cntSince">dias juntos</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+        <div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:8px;text-align:center">
+          <div style="font-size:9px;color:#f72585;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Primeiro Beijo</div>
+          <div style="font-size:20px;font-weight:700" id="kissPrev">—</div>
+          <div style="font-size:10px;color:var(--muted)" id="kissSince"></div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:8px;text-align:center">
+          <div style="font-size:9px;color:#4ade80;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Nos Conhecemos</div>
+          <div style="font-size:20px;font-weight:700" id="metPrev">—</div>
+          <div style="font-size:10px;color:var(--muted)" id="metSince"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -410,7 +428,7 @@ code{background:rgba(255,255,255,0.05);padding:1px 5px;border-radius:4px;font-si
 const DEF_META = {
   name1:"Lorrany",name2:"Lucas",
   eyebrow:"Uma história de amor",subtitle:"A nossa playlist favorita 🎵",heroEmoji:"💕",
-  startDate:"2023-01-15",
+  startDate:"2023-01-15",kissDate:"",metDate:"",
   musicTitle:"Nossa Música Favorita",musicArtist:"A definir",musicEmoji:"♪",
   letterLabel:"Para Lorrany",
   letterText:"Você transformou os meus dias em algo que eu não sabia que era possível.\n\nCada momento ao seu lado é uma música nova, uma que quero ouvir pra sempre.\n\nObrigado por ser exatamente quem você é — e por escolher estar aqui, comigo.",
@@ -532,7 +550,7 @@ function s(id,v){const e=document.getElementById(id);if(e&&v!==undefined)e.value
 function fill(){
   s('f-n1',meta.name1);s('f-n2',meta.name2);
   s('f-eye',meta.eyebrow);s('f-sub',meta.subtitle);s('f-emoji',meta.heroEmoji);
-  s('f-date',meta.startDate);
+  s('f-date',meta.startDate);s('f-kissDate',meta.kissDate);s('f-metDate',meta.metDate);
   s('f-llbl',meta.letterLabel);s('f-ltxt',meta.letterText);s('f-lsig',meta.letterSig);
   s('f-galtit',meta.galleryTitle);
 }
@@ -540,7 +558,7 @@ function fill(){
 function collect(){
   meta.name1=g('f-n1')||meta.name1; meta.name2=g('f-n2')||meta.name2;
   meta.eyebrow=g('f-eye'); meta.subtitle=g('f-sub'); meta.heroEmoji=g('f-emoji');
-  meta.startDate=g('f-date');
+  meta.startDate=g('f-date');meta.kissDate=g('f-kissDate');meta.metDate=g('f-metDate');
   meta.letterLabel=g('f-llbl'); meta.letterText=g('f-ltxt'); meta.letterSig=g('f-lsig');
   meta.galleryTitle=g('f-galtit');
 }
@@ -685,11 +703,26 @@ function rmPhoto(i){
 // ══════════════════════════════════════════════════
 // CONTADOR
 // ══════════════════════════════════════════════════
+function daysSince(dateStr){
+  if(!dateStr)return null;
+  const p=dateStr.split('-').map(Number);
+  if(p.length!==3||p.some(isNaN))return null;
+  const start=new Date(p[0],p[1]-1,p[2]);
+  const today=new Date();today.setHours(0,0,0,0);
+  return Math.round((today-start)/864e5);
+}
 function updCnt(){
-  const v=g('f-date')||meta.startDate;if(!v)return;
-  const s=new Date(v),d=Math.floor((new Date()-s)/864e5);
-  document.getElementById('cntPrev').textContent=d.toLocaleString('pt-BR');
-  document.getElementById('cntSince').textContent='dias desde '+s.toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
+  function showCnt(idNum,idSince,dateStr,label){
+    const d=daysSince(dateStr);
+    if(d===null){document.getElementById(idNum).textContent='—';document.getElementById(idSince).textContent='';return;}
+    const p=dateStr.split('-').map(Number);
+    const dt=new Date(p[0],p[1]-1,p[2]);
+    document.getElementById(idNum).textContent=d.toLocaleString('pt-BR');
+    document.getElementById(idSince).textContent=label+' '+dt.toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
+  }
+  showCnt('cntPrev','cntSince',g('f-date')||meta.startDate,'dias desde');
+  showCnt('kissPrev','kissSince',g('f-kissDate')||meta.kissDate,'beijos desde');
+  showCnt('metPrev','metSince',g('f-metDate')||meta.metDate,'conhecidos desde');
 }
 
 // ══════════════════════════════════════════════════

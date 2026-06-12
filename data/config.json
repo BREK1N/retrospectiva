@@ -1,12 +1,14 @@
 {
   "version": 1,
-  "lastUpdated": "2026-06-12T00:55:02.537Z",
+  "lastUpdated": "2026-06-12T01:39:13.459Z",
   "name1": "Lorrany Paes da Rocha",
   "name2": "Lucas Ferreira de Paula",
   "eyebrow": "Uma história de amor",
   "subtitle": "A nossa playlist favorita 🎵",
   "heroEmoji": "💕",
   "startDate": "2026-01-26",
+  "kissDate": "2024-05-04",
+  "metDate": "2024-01-08",
   "musicTitle": "ANAVITÓRIA, Lenine   Lisboa (visualizer)   ANAVITÓRIA (youtube)",
   "musicArtist": "A definir",
   "musicEmoji": "♪",
@@ -18,30 +20,37 @@
     {
       "emoji": "✨",
       "color": "pink",
-      "date": "Jan 2023",
+      "date": "Jan 2024",
       "title": "O Início",
-      "desc": "Aquele momento que mudou tudo."
-    },
-    {
-      "emoji": "💋",
-      "color": "gold",
-      "date": "Mar 2023",
-      "title": "Primeiro Beijo",
-      "desc": "O coração acelerado, o tempo parado."
+      "desc": "Aquele momento que mudou tudo. Um instante despretensioso em que te convidei para o meu aniversário, sem imaginar todo o futuro que me esperava. Foi a melhor decisão que eu poderia ter tomado."
     },
     {
       "emoji": "🎉",
       "color": "green",
-      "date": "Jun 2023",
-      "title": "Aniversário do Namoro",
-      "desc": "Um ano de risadas e descobertas."
+      "date": "Abr 2023",
+      "title": "Seu aniversário",
+      "desc": "O dia em que descobri a verdade sobre a sua idade. Mesmo com aquela mentira, decidi que queria ficar. Quebrei uma regra que mantenho até hoje, simplesmente porque, independente de qualquer coisa, o pouco tempo que eu já te conhecia tinha sido especial demais"
     },
     {
-      "emoji": "✈️",
+      "emoji": "💋",
+      "color": "gold",
+      "date": "Mai 2024",
+      "title": "Primeiro Beijo",
+      "desc": "Esse é o momento que mais gera discordância nas nossas discussões, mas todos sabem que fui eu quem tomou a iniciativa e deu o nosso primeiro beijo. Foi um dos melhores momentos da minha vida. Ali eu percebi que era você, e que faria de tudo para te ter como minha."
+    },
+    {
+      "emoji": "📆",
       "color": "blue",
-      "date": "Dez 2023",
-      "title": "Viagem Inesquecível",
-      "desc": "A melhor viagem sempre é ao lado de você."
+      "date": "2025",
+      "title": "2025",
+      "desc": "2025, como um todo, foi um ano de muitas descobertas e amadurecimento. Foi um ano em que nos vimos pouco, mas talvez o ano em que mais conversamos e consolidamos a nossa confiança um no outro. Já era uma fase em que podíamos falar qualquer coisa sem medo do que o outro ia pensar — pelo menos para mim, foi assim. E foi também o ano em que decidi que, assim que você terminasse a escola, eu te tornaria minha e te pediria em namoro. Mas acabei perdendo essa chance por medo e por momentos que dificultaram as coisas, como a sua viagem no final do ano"
+    },
+    {
+      "emoji": "⭐",
+      "color": "pink",
+      "date": "Jan 2026",
+      "title": "Pedido de namoro",
+      "desc": "Finalmente, reuni coragem para fazer o pedido. No dia 18/01/2026, te pedi em namoro com o maior medo do mundo no coração, apreensivo sobre a sua resposta. Quando você me pediu um tempo para pensar, tive quase certeza de que ouviria um não. Mas, no dia 26/01/2026, o 'sim' finalmente veio! Depois de tanta espera e ansiedade, vivi o dia mais feliz da minha vida. Foi a concretização daquilo que eu já dizia há muito tempo: que eu te tornaria minha. O próximo passo será o casamento."
     }
   ],
   "photos": [
